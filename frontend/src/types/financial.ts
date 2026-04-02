@@ -1,5 +1,6 @@
 export type Period = 'annual' | 'quarterly';
-export type Tab = 'income' | 'balance' | 'cashflow' | 'ratios';
+export type FinancialTab = 'income' | 'balance' | 'cashflow' | 'ratios';
+export type Tab = FinancialTab | 'earnings';
 
 export interface TickerInfo {
   symbol: string;
@@ -52,4 +53,14 @@ export interface ChartsResponse {
   basic_eps: (number | null)[];
   diluted_eps: (number | null)[];
   free_cash_flow: (number | null)[];
+}
+
+export interface EarningsHistoryResponse {
+  symbol: string;
+  quarters: string[];
+  estimated_eps: (number | null)[];
+  actual_eps: (number | null)[];
+  surprise: (number | null)[];
+  surprise_pct: (number | null)[];
+  beat: (boolean | null)[];
 }

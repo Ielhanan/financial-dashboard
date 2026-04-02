@@ -1,4 +1,4 @@
-import type { ChartsResponse, FinancialsResponse, Period, RatiosResponse, TickerInfo } from '../types/financial';
+import type { ChartsResponse, EarningsHistoryResponse, FinancialsResponse, Period, RatiosResponse, TickerInfo } from '../types/financial';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
@@ -29,4 +29,7 @@ export const api = {
 
   getCharts: (symbol: string, period: Period) =>
     get<ChartsResponse>(`/api/v1/ticker/${symbol}/charts?period=${period}`),
+
+  getEarningsHistory: (symbol: string) =>
+    get<EarningsHistoryResponse>(`/api/v1/ticker/${symbol}/earnings-history`),
 };

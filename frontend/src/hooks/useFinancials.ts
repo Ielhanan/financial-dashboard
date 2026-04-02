@@ -21,7 +21,7 @@ export function useFinancials() {
       api.getCashFlow(symbol, period),
       api.getRatios(symbol),
       api.getCharts(symbol, period),
-      api.getEarningsHistory(symbol),
+      api.getEarningsHistory(symbol).catch(() => null),
     ])
       .then(([info, income, balance, cashflow, ratios, charts, earnings]) => {
         dispatch({ type: 'SET_INFO',       payload: info });
@@ -30,7 +30,7 @@ export function useFinancials() {
         dispatch({ type: 'SET_FINANCIALS', tab: 'cashflow', payload: cashflow });
         dispatch({ type: 'SET_RATIOS',     payload: ratios });
         dispatch({ type: 'SET_CHARTS',     payload: charts });
-        dispatch({ type: 'SET_EARNINGS',   payload: earnings });
+        if (earnings) dispatch({ type: 'SET_EARNINGS', payload: earnings });
         dispatch({ type: 'SET_LOADING',    payload: false });
       })
       .catch((e: Error) => {

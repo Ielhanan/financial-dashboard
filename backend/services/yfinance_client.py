@@ -347,11 +347,34 @@ def get_earnings_history(symbol: str) -> dict:
         for a, e in zip(actual_eps, estimated_eps)
     ]
 
+    # Fetch quarterly revenue; match each announcement to the most recent
+    # completed fiscal quarter (largest quarter-end date <= announcement date).
+    revenue_by_date: dict = {}
+    try:
+        income = t.quarterly_income_stmt
+        if income is not None and "Total Revenue" in income.index:
+            for col in income.columns:
+                key = pd.Timestamp(col).tz_localize(None)
+                v = income.loc["Total Revenue", col]
+                revenue_by_date[key] = None if pd.isna(v) else int(v)
+    except Exception:
+        pass
+
+    def _revenue_for(announcement_ts):
+        ann = pd.Timestamp(announcement_ts).tz_localize(None)
+        candidates = [(k, v) for k, v in revenue_by_date.items() if k <= ann]
+        if not candidates:
+            return None
+        return max(candidates, key=lambda x: x[0])[1]
+
+    actual_revenue = [_revenue_for(ts) for ts in df.index]
+
     return {
-        "quarters":      quarters,
-        "estimated_eps": estimated_eps,
-        "actual_eps":    actual_eps,
-        "surprise":      surprise,
-        "surprise_pct":  surprise_pct,
-        "beat":          beat,
+        "quarters":       quarters,
+        "estimated_eps":  estimated_eps,
+        "actual_eps":     actual_eps,
+        "surprise":       surprise,
+        "surprise_pct":   surprise_pct,
+        "beat":           beat,
+        "actual_revenue": actual_revenue,
     }

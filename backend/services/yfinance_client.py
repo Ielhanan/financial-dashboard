@@ -308,3 +308,46 @@ def get_charts(symbol: str, period: PeriodType) -> dict:
         "diluted_eps":    _extract(inc_df, "Diluted EPS"),
         "free_cash_flow": _extract_aligned(cf_df, "Free Cash Flow"),
     }
+
+
+@cached
+def get_earnings_history(symbol: str) -> dict:
+    t = _ticker(symbol)
+    df = t.get_earnings_dates(limit=20)
+
+    if df is None or df.empty:
+        raise ValueError(f"No earnings history for '{symbol}'")
+
+    # Drop rows with no reported EPS (future scheduled dates)
+    df = df.dropna(subset=["Reported EPS"])
+
+    # Keep most recent 16 quarters, then reverse to chronological order
+    df = df.head(16).iloc[::-1]
+
+    quarters = [_format_quarterly_date(ts) for ts in df.index]
+
+    def _val(series, idx):
+        v = series.iloc[idx]
+        return None if pd.isna(v) else round(float(v), 4)
+
+    estimated_eps = [_val(df["EPS Estimate"], i) for i in range(len(df))]
+    actual_eps    = [_val(df["Reported EPS"], i) for i in range(len(df))]
+    surprise_pct  = [_val(df["Surprise(%)"], i) for i in range(len(df))]
+
+    surprise = [
+        round(a - e, 4) if a is not None and e is not None else None
+        for a, e in zip(actual_eps, estimated_eps)
+    ]
+    beat = [
+        a >= e if a is not None and e is not None else None
+        for a, e in zip(actual_eps, estimated_eps)
+    ]
+
+    return {
+        "quarters":      quarters,
+        "estimated_eps": estimated_eps,
+        "actual_eps":    actual_eps,
+        "surprise":      surprise,
+        "surprise_pct":  surprise_pct,
+        "beat":          beat,
+    }

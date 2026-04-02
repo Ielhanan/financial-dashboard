@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip show:*)",
+      "Bash(pip list:*)",
+      "Bash(npm --version)",
+      "Bash(python -c ':*)",
+      "Bash(pip install:*)",
+      "Bash(uvicorn main:app --port 8000)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s \"http://localhost:8000/api/v1/ticker/AAPL/info\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('name:', d['name'], '| price:', d['current_price']\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/ticker/AAPL/financials?period=annual\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('dates:', d['dates'][:2], '| rows:', len\\(d['rows']\\)\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/ticker/AAPL/ratios\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('ratios count:', len\\(d['ratios']\\)\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/ticker/INVALIDTICKER999/info\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('404 detail:', d['detail']\\)\")",
+      "Bash(python -m uvicorn --version)",
+      "Bash(python -m uvicorn main:app --port 8000)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('INCOME - dates:', d['dates'][:2], '| rows:', len\\(d['rows']\\)\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/ticker/AAPL/balance-sheet?period=annual\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('BALANCE - rows:', len\\(d['rows']\\)\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/ticker/AAPL/cash-flow?period=annual\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('CASHFLOW - rows:', len\\(d['rows']\\)\\)\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('RATIOS - count:', len\\(d['ratios']\\)\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/ticker/AAPL/charts?period=annual\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('CHARTS - dates:', d['dates'][:2], '| revenue:', [round\\(v/1e9,1\\) for v in d['revenue'][:2]], 'B'\\)\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('404:', d['detail']\\)\")",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}

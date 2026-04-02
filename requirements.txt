@@ -1,0 +1,15 @@
+# Core utilities used across tools
+python-dotenv
+
+# Google APIs (Sheets, Slides, Drive, etc.)
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+
+# HTTP / scraping
+requests
+beautifulsoup4
+
+# Data handling
+pandas

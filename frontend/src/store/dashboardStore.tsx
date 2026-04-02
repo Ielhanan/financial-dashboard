@@ -1,5 +1,15 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import type { ChartsResponse, EarningsHistoryResponse, FinancialTab, FinancialsResponse, Period, RatiosResponse, Tab, TickerInfo } from '../types/financial';
+import type {
+  ChartsResponse,
+  EarningsHistoryResponse,
+  FinancialTab,
+  FinancialsResponse,
+  Period,
+  RatiosResponse,
+  Tab,
+  TickerInfo,
+} from '../types/financial';
+import type { User, WatchList, ListStock } from '../types/auth';
 
 interface State {
   symbol: string | null;
@@ -12,6 +22,8 @@ interface State {
   earnings: EarningsHistoryResponse | null;
   loading: boolean;
   error: string | null;
+  user: User | null;
+  lists: WatchList[];
 }
 
 type Action =
@@ -24,7 +36,13 @@ type Action =
   | { type: 'SET_RATIOS'; payload: RatiosResponse }
   | { type: 'SET_EARNINGS'; payload: EarningsHistoryResponse }
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null };
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_USER'; payload: User | null }
+  | { type: 'SET_LISTS'; payload: WatchList[] }
+  | { type: 'ADD_LIST'; payload: WatchList }
+  | { type: 'REMOVE_LIST'; payload: string }
+  | { type: 'ADD_STOCK_TO_LIST'; list_id: string; payload: ListStock }
+  | { type: 'REMOVE_STOCK_FROM_LIST'; list_id: string; symbol: string };
 
 const initialFinancials: Record<FinancialTab, FinancialsResponse | null> = {
   income: null, balance: null, cashflow: null,
@@ -41,12 +59,14 @@ const initialState: State = {
   earnings: null,
   loading: false,
   error: null,
+  user: null,
+  lists: [],
 };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'SET_SYMBOL':
-      return { ...initialState, symbol: action.payload };
+      return { ...initialState, symbol: action.payload, user: state.user, lists: state.lists };
     case 'SET_TAB':
       return { ...state, activeTab: action.payload };
     case 'SET_PERIOD':
@@ -65,6 +85,32 @@ function reducer(state: State, action: Action): State {
       return { ...state, loading: action.payload };
     case 'SET_ERROR':
       return { ...state, error: action.payload, loading: false };
+    case 'SET_USER':
+      return { ...state, user: action.payload };
+    case 'SET_LISTS':
+      return { ...state, lists: action.payload };
+    case 'ADD_LIST':
+      return { ...state, lists: [...state.lists, action.payload] };
+    case 'REMOVE_LIST':
+      return { ...state, lists: state.lists.filter(l => l.id !== action.payload) };
+    case 'ADD_STOCK_TO_LIST':
+      return {
+        ...state,
+        lists: state.lists.map(l =>
+          l.id === action.list_id
+            ? { ...l, stocks: [...l.stocks, action.payload] }
+            : l
+        ),
+      };
+    case 'REMOVE_STOCK_FROM_LIST':
+      return {
+        ...state,
+        lists: state.lists.map(l =>
+          l.id === action.list_id
+            ? { ...l, stocks: l.stocks.filter(s => s.symbol !== action.symbol) }
+            : l
+        ),
+      };
     default:
       return state;
   }

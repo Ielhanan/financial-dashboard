@@ -321,6 +321,9 @@ def get_earnings_history(symbol: str) -> dict:
     # Drop rows with no reported EPS (future scheduled dates)
     df = df.dropna(subset=["Reported EPS"])
 
+    if df.empty:
+        raise ValueError(f"No historical earnings data for '{symbol}'")
+
     # Keep most recent 16 quarters, then reverse to chronological order
     df = df.head(16).iloc[::-1]
 
@@ -338,6 +341,7 @@ def get_earnings_history(symbol: str) -> dict:
         round(a - e, 4) if a is not None and e is not None else None
         for a, e in zip(actual_eps, estimated_eps)
     ]
+    # EPS equal to estimate counts as a beat (>= is intentional)
     beat = [
         a >= e if a is not None and e is not None else None
         for a, e in zip(actual_eps, estimated_eps)

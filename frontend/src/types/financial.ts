@@ -1,5 +1,5 @@
 export type Period = 'annual' | 'quarterly';
-export type FinancialTab = 'income' | 'balance' | 'cashflow' | 'ratios';
+export type FinancialTab = 'income' | 'balance' | 'cashflow';
 export type Tab = FinancialTab | 'earnings';
 
 export interface TickerInfo {

@@ -36,5 +36,5 @@ export function useFinancials() {
       .catch((e: Error) => {
         dispatch({ type: 'SET_ERROR', payload: e.message });
       });
-  }, [state.symbol, state.period]);
+  }, [state.symbol, state.period, dispatch]);
 }

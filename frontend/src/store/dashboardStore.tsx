@@ -27,7 +27,7 @@ type Action =
   | { type: 'SET_ERROR'; payload: string | null };
 
 const initialFinancials: Record<FinancialTab, FinancialsResponse | null> = {
-  income: null, balance: null, cashflow: null, ratios: null,
+  income: null, balance: null, cashflow: null,
 };
 
 const initialState: State = {

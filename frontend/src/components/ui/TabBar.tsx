@@ -6,6 +6,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'balance',  label: 'Balance Sheet' },
   { id: 'cashflow', label: 'Cash Flow' },
   { id: 'ratios',   label: 'Key Ratios' },
+  { id: 'earnings', label: 'Earnings' },
 ];
 
 export default function TabBar() {

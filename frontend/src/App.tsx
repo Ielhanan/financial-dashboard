@@ -12,6 +12,8 @@ import NetIncomeChart from './components/charts/NetIncomeChart';
 import EPSChart from './components/charts/EPSChart';
 import FreeCashFlowChart from './components/charts/FreeCashFlowChart';
 import { formatValue } from './components/financials/FinancialsTable';
+import EarningsChart from './components/financials/EarningsChart';
+import EarningsTable from './components/financials/EarningsTable';
 
 function formatPct(v: number | null): string {
   if (v == null) return '—';
@@ -22,7 +24,7 @@ function formatPct(v: number | null): string {
 function Dashboard() {
   useFinancials();
   const { state } = useDashboard();
-  const { symbol, info, financials, charts, ratios, loading, error, activeTab } = state;
+  const { symbol, info, financials, charts, ratios, earnings, loading, error, activeTab } = state;
 
   if (!symbol) {
     return (
@@ -118,6 +120,12 @@ function Dashboard() {
         {activeTab === 'balance'  && financials.balance  && <FinancialsTable dates={financials.balance.dates}  rows={financials.balance.rows} />}
         {activeTab === 'cashflow' && financials.cashflow && <FinancialsTable dates={financials.cashflow.dates} rows={financials.cashflow.rows} />}
         {activeTab === 'ratios'   && ratios              && <KeyRatios ratios={ratios.ratios} />}
+        {activeTab === 'earnings' && earnings            && (
+          <div className="px-6 pt-4">
+            <EarningsChart earnings={earnings} />
+            <EarningsTable earnings={earnings} />
+          </div>
+        )}
       </div>
     </main>
   );

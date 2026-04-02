@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import type { ChartsResponse, FinancialsResponse, Period, RatiosResponse, Tab, TickerInfo } from '../types/financial';
+import type { ChartsResponse, EarningsHistoryResponse, FinancialTab, FinancialsResponse, Period, RatiosResponse, Tab, TickerInfo } from '../types/financial';
 
 interface State {
   symbol: string | null;
   activeTab: Tab;
   period: Period;
   info: TickerInfo | null;
-  financials: Record<Tab, FinancialsResponse | null>;
+  financials: Record<FinancialTab, FinancialsResponse | null>;
   charts: ChartsResponse | null;
   ratios: RatiosResponse | null;
+  earnings: EarningsHistoryResponse | null;
   loading: boolean;
   error: string | null;
 }
@@ -18,13 +19,14 @@ type Action =
   | { type: 'SET_TAB'; payload: Tab }
   | { type: 'SET_PERIOD'; payload: Period }
   | { type: 'SET_INFO'; payload: TickerInfo }
-  | { type: 'SET_FINANCIALS'; tab: Tab; payload: FinancialsResponse }
+  | { type: 'SET_FINANCIALS'; tab: FinancialTab; payload: FinancialsResponse }
   | { type: 'SET_CHARTS'; payload: ChartsResponse }
   | { type: 'SET_RATIOS'; payload: RatiosResponse }
+  | { type: 'SET_EARNINGS'; payload: EarningsHistoryResponse }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null };
 
-const initialFinancials: Record<Tab, FinancialsResponse | null> = {
+const initialFinancials: Record<FinancialTab, FinancialsResponse | null> = {
   income: null, balance: null, cashflow: null, ratios: null,
 };
 
@@ -36,6 +38,7 @@ const initialState: State = {
   financials: initialFinancials,
   charts: null,
   ratios: null,
+  earnings: null,
   loading: false,
   error: null,
 };
@@ -56,6 +59,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, charts: action.payload };
     case 'SET_RATIOS':
       return { ...state, ratios: action.payload };
+    case 'SET_EARNINGS':
+      return { ...state, earnings: action.payload };
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
     case 'SET_ERROR':

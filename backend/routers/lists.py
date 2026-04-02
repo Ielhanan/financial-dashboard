@@ -52,11 +52,10 @@ async def create_list(
     lst = List(user_id=user.id, name=body.name)
     db.add(lst)
     await db.commit()
-    await db.execute(
+    result = await db.execute(
         select(List).where(List.id == lst.id).options(selectinload(List.stocks))
     )
-    await db.refresh(lst)
-    lst.stocks  # ensure relationship is loaded (empty list)
+    lst = result.scalar_one()
     return _serialize_list(lst)
 
 

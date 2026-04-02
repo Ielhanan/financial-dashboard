@@ -3,7 +3,7 @@ import type { ChartsResponse, EarningsHistoryResponse, FinancialsResponse, Perio
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`);
+  const res = await fetch(`${BASE}${path}`, { credentials: 'include' });
   if (!res.ok) {
     const err = await res.json().catch(() => ({})) as { detail?: string };
     throw new Error(err.detail ?? `HTTP ${res.status}`);

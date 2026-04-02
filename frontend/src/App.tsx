@@ -1,6 +1,8 @@
 import { DashboardProvider, useDashboard } from './store/dashboardStore';
 import { useFinancials } from './hooks/useFinancials';
+import { useAuth, useLists } from './hooks/useLists';
 import Header from './components/layout/Header';
+import Sidebar from './components/sidebar/Sidebar';
 import StatCard from './components/ui/StatCard';
 import TabBar from './components/ui/TabBar';
 import PeriodToggle from './components/ui/PeriodToggle';
@@ -23,6 +25,8 @@ function formatPct(v: number | null): string {
 
 function Dashboard() {
   useFinancials();
+  useAuth();
+  useLists();
   const { state } = useDashboard();
   const { symbol, info, financials, charts, ratios, earnings, loading, error, activeTab } = state;
 
@@ -62,7 +66,6 @@ function Dashboard() {
 
   return (
     <main className="flex-1 overflow-auto">
-      {/* Ticker info bar */}
       {info && (
         <div className="px-6 py-4 border-b border-border">
           <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
@@ -101,7 +104,6 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Charts */}
       {charts && (
         <div className="px-6 py-4 grid grid-cols-2 xl:grid-cols-4 gap-4 border-b border-border">
           <RevenueChart charts={charts} />
@@ -111,7 +113,6 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Financial tables */}
       <div className="px-6 pt-4 pb-2">
         <TabBar />
       </div>
@@ -131,12 +132,24 @@ function Dashboard() {
   );
 }
 
+function InnerApp() {
+  const { state } = useDashboard();
+  return (
+    <>
+      {state.user && <Sidebar />}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <Header />
+        <Dashboard />
+      </div>
+    </>
+  );
+}
+
 export default function App() {
   return (
     <DashboardProvider>
-      <div className="flex flex-col h-screen bg-bg-base text-text-primary overflow-hidden">
-        <Header />
-        <Dashboard />
+      <div className="flex h-screen bg-bg-base text-text-primary overflow-hidden">
+        <InnerApp />
       </div>
     </DashboardProvider>
   );

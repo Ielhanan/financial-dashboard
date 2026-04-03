@@ -3,12 +3,19 @@ import os
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Depends, Response
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from db import get_db
 from models.user import User
-from services.auth_service import create_access_token, get_current_user, upsert_user
+from services.auth_service import (
+    authenticate_local_user,
+    create_access_token,
+    get_current_user,
+    register_local_user,
+    upsert_user,
+)
 
 router = APIRouter()
 
@@ -25,6 +32,20 @@ _oauth.register(
     client_kwargs={'scope': 'openid email profile'},
 )
 
+
+def _set_auth_cookie(response: Response, user_id: str) -> None:
+    token = create_access_token(user_id)
+    response.set_cookie(
+        key='access_token',
+        value=f'Bearer {token}',
+        httponly=True,
+        samesite='lax',
+        max_age=_EXPIRE_DAYS * 24 * 3600,
+        secure=_IS_PROD,
+    )
+
+
+# ── Google OAuth ──────────────────────────────────────────────────────────────
 
 @router.get('/auth/google')
 async def login(request: Request):
@@ -43,18 +64,39 @@ async def auth_callback(request: Request, db: AsyncSession = Depends(get_db)):
         name=info['name'],
         avatar_url=info.get('picture'),
     )
-    access_token = create_access_token(user.id)
     response = RedirectResponse(url=FRONTEND_URL)
-    response.set_cookie(
-        key='access_token',
-        value=f'Bearer {access_token}',
-        httponly=True,
-        samesite='lax',
-        max_age=_EXPIRE_DAYS * 24 * 3600,
-        secure=_IS_PROD,
-    )
+    _set_auth_cookie(response, user.id)
     return response
 
+
+# ── Local auth ────────────────────────────────────────────────────────────────
+
+class RegisterBody(BaseModel):
+    email: str
+    name: str
+    password: str
+
+
+class LoginBody(BaseModel):
+    email: str
+    password: str
+
+
+@router.post('/auth/register', status_code=201)
+async def register(body: RegisterBody, response: Response, db: AsyncSession = Depends(get_db)):
+    user = await register_local_user(db, email=body.email, name=body.name, password=body.password)
+    _set_auth_cookie(response, user.id)
+    return {'id': user.id, 'email': user.email, 'name': user.name, 'avatar_url': user.avatar_url}
+
+
+@router.post('/auth/login')
+async def local_login(body: LoginBody, response: Response, db: AsyncSession = Depends(get_db)):
+    user = await authenticate_local_user(db, email=body.email, password=body.password)
+    _set_auth_cookie(response, user.id)
+    return {'id': user.id, 'email': user.email, 'name': user.name, 'avatar_url': user.avatar_url}
+
+
+# ── Session ───────────────────────────────────────────────────────────────────
 
 @router.get('/auth/me')
 async def me(user: User = Depends(get_current_user)):

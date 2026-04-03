@@ -23,10 +23,15 @@ target_metadata = Base.metadata
 def _get_url() -> str:
     raw = os.getenv('DATABASE_URL', 'sqlite+aiosqlite:///./dev.db')
     if raw.startswith('postgres://'):
-        return raw.replace('postgres://', 'postgresql+asyncpg://', 1)
-    if raw.startswith('postgresql://'):
-        return raw.replace('postgresql://', 'postgresql+asyncpg://', 1)
-    return raw
+        url = raw.replace('postgres://', 'postgresql+asyncpg://', 1)
+    elif raw.startswith('postgresql://'):
+        url = raw.replace('postgresql://', 'postgresql+asyncpg://', 1)
+    else:
+        return raw
+    # asyncpg uses ssl=require, not sslmode=require
+    url = url.replace('?sslmode=require', '?ssl=require')
+    url = url.replace('&sslmode=require', '&ssl=require')
+    return url
 
 
 def run_migrations_offline() -> None:

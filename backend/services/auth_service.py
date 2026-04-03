@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from fastapi import Cookie, Depends, HTTPException
 from jose import JWTError, jwt
+from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +13,8 @@ from models.user import User
 _SECRET = os.getenv('JWT_SECRET', 'dev-secret-change-in-prod')
 _ALGORITHM = 'HS256'
 _EXPIRE_DAYS = 7
+
+_pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
 def create_access_token(user_id: str) -> str:
@@ -37,6 +40,42 @@ async def upsert_user(
         db.add(user)
     await db.commit()
     await db.refresh(user)
+    return user
+
+
+async def register_local_user(
+    db: AsyncSession,
+    *,
+    email: str,
+    name: str,
+    password: str,
+) -> User:
+    result = await db.execute(select(User).where(User.email == email))
+    if result.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail='Email already registered')
+    user = User(
+        email=email,
+        name=name,
+        password_hash=_pwd_context.hash(password),
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
+async def authenticate_local_user(
+    db: AsyncSession,
+    *,
+    email: str,
+    password: str,
+) -> User:
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+    if not user or not user.password_hash:
+        raise HTTPException(status_code=401, detail='Invalid email or password')
+    if not _pwd_context.verify(password, user.password_hash):
+        raise HTTPException(status_code=401, detail='Invalid email or password')
     return user
 
 

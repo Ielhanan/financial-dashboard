@@ -8,8 +8,8 @@ from routers import auth, earnings, financials, lists, ratios, search
 
 app = FastAPI(title="Financial Dashboard API", version="1.0.0")
 
-_allowed = set(os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(","))
-_frontend = os.getenv("FRONTEND_URL", "http://localhost:5173")
+_allowed = {o.rstrip('/') for o in os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")}
+_frontend = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip('/')
 if _frontend:
     _allowed.add(_frontend)
 ALLOWED_ORIGINS = list(_allowed)
